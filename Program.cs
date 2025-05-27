@@ -132,7 +132,7 @@ using System.Text.Json.Serialization;
 using webapi.Data;
 using webapi.Services;
 
-public class Program
+public partial class Program
 {
     public static void Main(string[] args)
     {

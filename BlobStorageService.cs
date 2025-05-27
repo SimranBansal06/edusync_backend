@@ -97,7 +97,7 @@ namespace webapi.Services
             _containerName = configuration["AzureBlobStorage:ContainerName"] ?? "courses";
         }
 
-        public async Task<string> UploadCourseFileAsync(IFormFile file, string courseIdPrefix = null)
+        public async Task<string> UploadCourseFileAsync(IFormFile file, string? courseIdPrefix = null)
         {
             if (file == null || file.Length == 0)
             {
@@ -128,7 +128,7 @@ namespace webapi.Services
             return blobClient.Uri.ToString();
         }
 
-        public async Task<List<string>> ListCourseFilesAsync(string prefix = null)
+        public async Task<List<string>> ListCourseFilesAsync(string? prefix = null)
         {
             List<string> fileUrls = new List<string>();
 
