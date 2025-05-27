@@ -1,0 +1,597 @@
+////using System;
+////using System.Collections.Generic;
+////using System.Linq;
+////using System.Threading.Tasks;
+////using Microsoft.AspNetCore.Http;
+////using Microsoft.AspNetCore.Mvc;
+////using Microsoft.EntityFrameworkCore;
+////using webapi.Data;
+////using webapi.Models;
+
+////namespace webapi.Controllers
+////{
+////    [Route("api/[controller]")]
+////    [ApiController]
+////    public class CourseModelsController : ControllerBase
+////    {
+////        private readonly AppDbContext _context;
+
+////        public CourseModelsController(AppDbContext context)
+////        {
+////            _context = context;
+////        }
+
+////        // GET: api/CourseModels
+////        [HttpGet]
+////        public async Task<ActionResult<IEnumerable<CourseModel>>> GetCourseModels()
+////        {
+////            return await _context.CourseModels.ToListAsync();
+////        }
+
+////        // GET: api/CourseModels/5
+////        [HttpGet("{id}")]
+////        public async Task<ActionResult<CourseModel>> GetCourseModel(Guid id)
+////        {
+////            var courseModel = await _context.CourseModels.FindAsync(id);
+
+////            if (courseModel == null)
+////            {
+////                return NotFound();
+////            }
+
+////            return courseModel;
+////        }
+
+////        // PUT: api/CourseModels/5
+////        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+////        [HttpPut("{id}")]
+////        public async Task<IActionResult> PutCourseModel(Guid id, CourseModel courseModel)
+////        {
+////            if (id != courseModel.CourseId)
+////            {
+////                return BadRequest();
+////            }
+
+////            _context.Entry(courseModel).State = EntityState.Modified;
+
+////            try
+////            {
+////                await _context.SaveChangesAsync();
+////            }
+////            catch (DbUpdateConcurrencyException)
+////            {
+////                if (!CourseModelExists(id))
+////                {
+////                    return NotFound();
+////                }
+////                else
+////                {
+////                    throw;
+////                }
+////            }
+
+////            return NoContent();
+////        }
+
+////        // POST: api/CourseModels
+////        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+////        [HttpPost]
+////        public async Task<ActionResult<CourseModel>> PostCourseModel(CourseModel courseModel)
+////        {
+////            _context.CourseModels.Add(courseModel);
+////            try
+////            {
+////                await _context.SaveChangesAsync();
+////            }
+////            catch (DbUpdateException)
+////            {
+////                if (CourseModelExists(courseModel.CourseId))
+////                {
+////                    return Conflict();
+////                }
+////                else
+////                {
+////                    throw;
+////                }
+////            }
+
+////            return CreatedAtAction("GetCourseModel", new { id = courseModel.CourseId }, courseModel);
+////        }
+
+////        // DELETE: api/CourseModels/5
+////        [HttpDelete("{id}")]
+////        public async Task<IActionResult> DeleteCourseModel(Guid id)
+////        {
+////            var courseModel = await _context.CourseModels.FindAsync(id);
+////            if (courseModel == null)
+////            {
+////                return NotFound();
+////            }
+
+////            _context.CourseModels.Remove(courseModel);
+////            await _context.SaveChangesAsync();
+
+////            return NoContent();
+////        }
+
+////        private bool CourseModelExists(Guid id)
+////        {
+////            return _context.CourseModels.Any(e => e.CourseId == id);
+////        }
+////    }
+////}
+//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Threading.Tasks;
+//using Microsoft.AspNetCore.Http;
+//using Microsoft.AspNetCore.Mvc;
+//using Microsoft.EntityFrameworkCore;
+//using webapi.Data;
+//using webapi.Models;
+//using webapi.DTOs;  // Add this line
+
+//namespace webapi.Controllers
+//{
+//    [Route("api/[controller]")]
+//    [ApiController]
+//    public class CourseModelsController : ControllerBase
+//    {
+//        private readonly AppDbContext _context;
+
+//        public CourseModelsController(AppDbContext context)
+//        {
+//            _context = context;
+//        }
+
+//        // GET: api/CourseModels
+//        [HttpGet]
+//        public async Task<ActionResult<IEnumerable<CourseModel>>> GetCourseModels()
+//        {
+//            return await _context.CourseModels.ToListAsync();
+//        }
+
+//        // GET: api/CourseModels/5
+//        [HttpGet("{id}")]
+//        public async Task<ActionResult<CourseModel>> GetCourseModel(Guid id)
+//        {
+//            var courseModel = await _context.CourseModels.FindAsync(id);
+
+//            if (courseModel == null)
+//            {
+//                return NotFound();
+//            }
+
+//            return courseModel;
+//        }
+
+//        // PUT: api/CourseModels/5
+//        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+//        [HttpPut("{id}")]
+//        public async Task<IActionResult> PutCourseModel(Guid id, CourseModel courseModel)
+//        {
+//            if (id != courseModel.CourseId)
+//            {
+//                return BadRequest();
+//            }
+
+//            _context.Entry(courseModel).State = EntityState.Modified;
+
+//            try
+//            {
+//                await _context.SaveChangesAsync();
+//            }
+//            catch (DbUpdateConcurrencyException)
+//            {
+//                if (!CourseModelExists(id))
+//                {
+//                    return NotFound();
+//                }
+//                else
+//                {
+//                    throw;
+//                }
+//            }
+
+//            return NoContent();
+//        }
+
+//        // POST: api/CourseModels
+//        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+//        [HttpPost]
+//        public async Task<ActionResult<CourseModel>> PostCourseModel(CourseCreateDto courseDto)
+//        {
+//            // Create a new CourseModel from the DTO
+//            var courseModel = new CourseModel
+//            {
+//                CourseId = Guid.NewGuid(),
+//                Title = courseDto.Title,
+//                Description = courseDto.Description,
+//                InstructorId = courseDto.InstructorId,
+//                MediaUrl = courseDto.MediaUrl
+//            };
+
+//            _context.CourseModels.Add(courseModel);
+
+//            try
+//            {
+//                await _context.SaveChangesAsync();
+//            }
+//            catch (DbUpdateException)
+//            {
+//                if (CourseModelExists(courseModel.CourseId))
+//                {
+//                    return Conflict();
+//                }
+//                else
+//                {
+//                    throw;
+//                }
+//            }
+
+//            return CreatedAtAction("GetCourseModel", new { id = courseModel.CourseId }, courseModel);
+//        }
+
+//        // DELETE: api/CourseModels/5
+//        [HttpDelete("{id}")]
+//        public async Task<IActionResult> DeleteCourseModel(Guid id)
+//        {
+//            var courseModel = await _context.CourseModels.FindAsync(id);
+//            if (courseModel == null)
+//            {
+//                return NotFound();
+//            }
+
+//            _context.CourseModels.Remove(courseModel);
+//            await _context.SaveChangesAsync();
+
+//            return NoContent();
+//        }
+
+//        private bool CourseModelExists(Guid id)
+//        {
+//            return _context.CourseModels.Any(e => e.CourseId == id);
+//        }
+//    }
+//}
+
+//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Threading.Tasks;
+//using Microsoft.AspNetCore.Http;
+//using Microsoft.AspNetCore.Mvc;
+//using Microsoft.EntityFrameworkCore;
+//using webapi.Data;
+//using webapi.Models;
+//using webapi.DTOs;
+//using System.IO;
+//using Microsoft.Extensions.Hosting;
+
+//namespace webapi.Controllers
+//{
+//    [Route("api/[controller]")]
+//    [ApiController]
+//    public class CourseModelsController : ControllerBase
+//    {
+//        private readonly AppDbContext _context;
+//        private readonly IHostEnvironment _environment;
+
+//        public CourseModelsController(AppDbContext context, IHostEnvironment environment)
+//        {
+//            _context = context;
+//            _environment = environment;
+//        }
+
+//        // GET: api/CourseModels
+//        [HttpGet]
+//        public async Task<ActionResult<IEnumerable<CourseModel>>> GetCourseModels()
+//        {
+//            return await _context.CourseModels.ToListAsync();
+//        }
+
+//        // GET: api/CourseModels/5
+//        [HttpGet("{id}")]
+//        public async Task<ActionResult<CourseModel>> GetCourseModel(Guid id)
+//        {
+//            var courseModel = await _context.CourseModels.FindAsync(id);
+
+//            if (courseModel == null)
+//            {
+//                return NotFound();
+//            }
+
+//            return courseModel;
+//        }
+
+//        // PUT: api/CourseModels/5
+//        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+//        [HttpPut("{id}")]
+//        public async Task<IActionResult> PutCourseModel(Guid id, CourseModel courseModel)
+//        {
+//            if (id != courseModel.CourseId)
+//            {
+//                return BadRequest();
+//            }
+
+//            _context.Entry(courseModel).State = EntityState.Modified;
+
+//            try
+//            {
+//                await _context.SaveChangesAsync();
+//            }
+//            catch (DbUpdateConcurrencyException)
+//            {
+//                if (!CourseModelExists(id))
+//                {
+//                    return NotFound();
+//                }
+//                else
+//                {
+//                    throw;
+//                }
+//            }
+
+//            return NoContent();
+//        }
+
+//        // POST: api/CourseModels
+//        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+//        [HttpPost]
+//        public async Task<ActionResult<CourseModel>> PostCourseModel(CourseCreateDto courseDto)
+//        {
+//            // Create a new CourseModel from the DTO
+//            var courseModel = new CourseModel
+//            {
+//                CourseId = Guid.NewGuid(),
+//                Title = courseDto.Title,
+//                Description = courseDto.Description,
+//                InstructorId = courseDto.InstructorId,
+//                MediaUrl = courseDto.MediaUrl
+//            };
+
+//            _context.CourseModels.Add(courseModel);
+
+//            try
+//            {
+//                await _context.SaveChangesAsync();
+//            }
+//            catch (DbUpdateException)
+//            {
+//                if (CourseModelExists(courseModel.CourseId))
+//                {
+//                    return Conflict();
+//                }
+//                else
+//                {
+//                    throw;
+//                }
+//            }
+
+//            return CreatedAtAction("GetCourseModel", new { id = courseModel.CourseId }, courseModel);
+//        }
+
+//        // DELETE: api/CourseModels/5
+//        [HttpDelete("{id}")]
+//        public async Task<IActionResult> DeleteCourseModel(Guid id)
+//        {
+//            var courseModel = await _context.CourseModels.FindAsync(id);
+//            if (courseModel == null)
+//            {
+//                return NotFound();
+//            }
+
+//            _context.CourseModels.Remove(courseModel);
+//            await _context.SaveChangesAsync();
+
+//            return NoContent();
+//        }
+
+//        // POST: api/CourseModels/upload
+//        [HttpPost("upload")]
+//        [ProducesResponseType(StatusCodes.Status200OK)]
+//        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+//        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+//        public async Task<IActionResult> UploadFile(IFormFile file)
+//        {
+//            if (file == null || file.Length == 0)
+//            {
+//                return BadRequest(new { message = "No file provided or file is empty." });
+//            }
+
+//            // Define a path to save the uploads
+//            var uploadsFolderPath = Path.Combine(_environment.ContentRootPath, "wwwroot", "uploads");
+//            if (!Directory.Exists(uploadsFolderPath))
+//            {
+//                Directory.CreateDirectory(uploadsFolderPath);
+//            }
+
+//            // Generate a unique filename to prevent overwriting existing files
+//            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+//            var filePath = Path.Combine(uploadsFolderPath, uniqueFileName);
+
+//            try
+//            {
+//                using (var stream = new FileStream(filePath, FileMode.Create))
+//                {
+//                    await file.CopyToAsync(stream);
+//                }
+
+//                // Construct the URL that the frontend can use to access the file
+//                var fileUrl = $"{Request.Scheme}://{Request.Host}/uploads/{uniqueFileName}";
+
+//                // Return the URL in a JSON object
+//                return Ok(new { url = fileUrl });
+//            }
+//            catch (Exception ex)
+//            {
+//                // Log the exception (using a proper logging framework is recommended)
+//                Console.WriteLine($"Error uploading file: {ex.Message}");
+//                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while uploading the file." });
+//            }
+//        }
+
+//        private bool CourseModelExists(Guid id)
+//        {
+//            return _context.CourseModels.Any(e => e.CourseId == id);
+//        }
+//    }
+//}
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using webapi.Data;
+using webapi.Models;
+
+namespace webapi.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class CourseModelsController : ControllerBase
+    {
+        private readonly AppDbContext _context;
+
+        public CourseModelsController(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        // GET: api/CourseModels
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<CourseModel>>> GetCourseModels()
+        {
+            return await _context.CourseModels.ToListAsync();
+        }
+
+        // GET: api/CourseModels/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<CourseModel>> GetCourseModel(Guid id)
+        {
+            var courseModel = await _context.CourseModels
+                .Include(c => c.AssessmentModels) // Changed from Modules to AssessmentModels
+                .Include(c => c.Instructor)
+                .FirstOrDefaultAsync(c => c.CourseId == id);
+
+            if (courseModel == null)
+            {
+                return NotFound();
+            }
+
+            return courseModel;
+        }
+
+        // PUT: api/CourseModels/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutCourseModel(Guid id, CourseModel courseModel)
+        {
+            if (id != courseModel.CourseId)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(courseModel).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CourseModelExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // POST: api/CourseModels
+        [HttpPost]
+        public async Task<ActionResult<CourseModel>> PostCourseModel(CourseModel courseModel)
+        {
+            _context.CourseModels.Add(courseModel);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetCourseModel", new { id = courseModel.CourseId }, courseModel);
+        }
+
+        // DELETE: api/CourseModels/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCourseModel(Guid id)
+        {
+            var courseModel = await _context.CourseModels.FindAsync(id);
+            if (courseModel == null)
+            {
+                return NotFound();
+            }
+
+            _context.CourseModels.Remove(courseModel);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool CourseModelExists(Guid id)
+        {
+            return _context.CourseModels.Any(e => e.CourseId == id);
+        }
+
+        // POST: api/CourseModels/upload
+        [HttpPost("upload")]
+        public async Task<IActionResult> UploadFile(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file uploaded");
+            }
+
+            try
+            {
+                // Define a path to save the uploads
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+
+                // Ensure the directory exists
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                // Generate a unique file name to prevent overwriting
+                string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                // Save the file
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                // Return the URL to access the file
+                string fileUrl = $"/uploads/{uniqueFileName}";
+
+                return Ok(new
+                {
+                    fileName = file.FileName,
+                    url = fileUrl,
+                    fileType = file.ContentType,
+                    fileSize = file.Length
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+    }
+}

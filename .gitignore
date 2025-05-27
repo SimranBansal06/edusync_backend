@@ -1,0 +1,93 @@
+# ASP.NET Core specific ignores
+*.swp
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.tmp
+*.userprefs
+*.dbmdl
+*.jfm
+*.pfx
+*.publishsettings
+
+# Visual Studio Code
+.vscode/
+.vs/
+*.code-workspace
+
+# Visual Studio
+.vs/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Sensitive configuration files
+appsettings.json
+appsettings.*.json
+!appsettings.example.json
+
+# Azure Keys and Secrets
+*.pubxml
+*.pubxml.user
+PublishProfiles/
+
+# Database files
+*.mdf
+*.ldf
+*.ndf
+
+# .NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Local History files
+.localhistory/
+
+# Azure Emulator
+.cloud-emulator/
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Azure Functions
+local.settings.json
+settings.json
+
+# User-specific files
+*.rsuser
+
+# NuGet packages
+*.nupkg
+# The packages folder can be ignored because of Package Restore
+**/[Pp]ackages/*
+# except build/, which is used as an MSBuild target.
+!**/[Pp]ackages/build/
+# Uncomment if necessary however generally it will be regenerated when needed
+#!**/[Pp]ackages/repositories.config
+# NuGet v3's project.json files produces more ignorable files
+*.nuget.props
+*.nuget.targets
+
+# Upload directories for development
+uploads/
+wwwroot/uploads/
+
+# Project-specific
+*.db
+*.db-shm
+*.db-wal
+
+# Temporary files
+*.tmp
+*.log 
