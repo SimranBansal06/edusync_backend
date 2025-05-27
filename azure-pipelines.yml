@@ -11,7 +11,7 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  azureAppName: 'webapi20250527115544'
+  azureAppName: 'edusyncbackendapi'
 
 # Define the steps for the pipeline
 steps:
