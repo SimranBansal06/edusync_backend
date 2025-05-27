@@ -186,7 +186,7 @@
 
 // GET: api/CourseModels/download/{blobFileName}
 [HttpGet("download/{blobFileName}")]
-public async Task<IActionResult> DownloadFile(string blobFileName)
+async Task<IActionResult> DownloadFile(string blobFileName)
 {
     try
     {
