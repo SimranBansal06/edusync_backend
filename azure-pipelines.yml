@@ -7,21 +7,18 @@ trigger:
 
 # Use a Microsoft-hosted agent VM image
 pool:
-  vmImage: 'windows-latest' # Using Windows as the project seems to be developed on Windows
+  vmImage: 'windows-latest'
 
 variables:
-  buildConfiguration: 'Release' # Standard build configuration
-  # --- Azure App Service Details ---
-  # Replace with the exact name of your Azure App Service
-  azureAppName: 'webapi20250527115544' # Update this with your actual Azure App Service name
-  # ---------------------------------
+  buildConfiguration: 'Release'
+  azureAppName: 'webapi20250527115544'
 
-# Define the steps (tasks) for the pipeline
+# Define the steps for the pipeline
 steps:
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
-    version: '8.x' # Using .NET 8.x as specified in your project file
+    version: '8.x'
   displayName: 'Install .NET SDK'
 
 - script: dotnet restore
@@ -30,50 +27,19 @@ steps:
 - script: dotnet build --configuration $(buildConfiguration) --no-restore
   displayName: 'Build .NET Project'
 
-#- script: dotnet test --no-build --verbosity normal # Uncomment if you have unit tests
-#  displayName: 'Run Tests'
-
 - script: dotnet publish -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory) --no-build
   displayName: 'Publish .NET Project'
 
-# Create a web.config file if not already in the project
+# Create web.config file
 - powershell: |
-    $webConfigPath = "$(Build.ArtifactStagingDirectory)/web.config"
-    if (-not (Test-Path $webConfigPath)) {
-      $webConfigContent = @"
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <location path="." inheritInChildApplications="false">
-    <system.webServer>
-      <handlers>
-        <add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModuleV2" resourceType="Unspecified" />
-      </handlers>
-      <aspNetCore processPath="dotnet" arguments=".\webapi.dll" stdoutLogEnabled="true" stdoutLogFile="\\?\%home%\LogFiles\stdout" hostingModel="inprocess" />
-    </system.webServer>
-  </location>
-</configuration>
-"@
-      Set-Content -Path $webConfigPath -Value $webConfigContent
-    }
-  displayName: 'Ensure web.config exists'
+    $content = '<?xml version="1.0" encoding="utf-8"?><configuration><location path="." inheritInChildApplications="false"><system.webServer><handlers><add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModuleV2" resourceType="Unspecified" /></handlers><aspNetCore processPath="dotnet" arguments=".\webapi.dll" stdoutLogEnabled="true" stdoutLogFile="\\?\%home%\LogFiles\stdout" hostingModel="inprocess" /></system.webServer></location></configuration>'
+    Set-Content -Path "$(Build.ArtifactStagingDirectory)/web.config" -Value $content
+  displayName: 'Create web.config'
 
-# Create an example appsettings.json for the deployed app
+# Create basic appsettings.json
 - powershell: |
-    $appSettingsPath = "$(Build.ArtifactStagingDirectory)/appsettings.json"
-    if (-not (Test-Path $appSettingsPath)) {
-      $appSettingsContent = @"
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
-  "AllowedHosts": "*"
-}
-"@
-      Set-Content -Path $appSettingsPath -Value $appSettingsContent
-    }
+    $content = '{"Logging":{"LogLevel":{"Default":"Information","Microsoft.AspNetCore":"Warning"}},"AllowedHosts":"*"}'
+    Set-Content -Path "$(Build.ArtifactStagingDirectory)/appsettings.json" -Value $content
   displayName: 'Create basic appsettings.json'
 
 # Create publish artifact
@@ -87,11 +53,9 @@ steps:
 # Deploy to Azure App Service
 - task: AzureWebApp@1
   inputs:
-    # --- Azure Deployment Details ---
-    azureSubscription: 'EduSyncAzureConnection' # Ensure this matches your Service Connection Name
+    azureSubscription: 'Azureconnections'
     appType: 'webApp'
     appName: '$(azureAppName)'
     package: '$(Build.ArtifactStagingDirectory)'
     deploymentMethod: 'auto'
-    # --------------------------------
-  displayName: 'Deploy to Azure App Service'
+  displayName: 'Deploy to Azure App Service' 
