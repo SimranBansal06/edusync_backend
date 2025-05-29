@@ -18,10 +18,9 @@ public class Program
         {
             options.AddPolicy("AllowAllOrigins", policy =>
             {
-                policy.WithOrigins("https://agreeable-cliff-01fee0e00.6.azurestaticapps.net")
+                policy.AllowAnyOrigin()
                       .AllowAnyHeader()
-                      .AllowAnyMethod()
-                      .AllowCredentials();
+                      .AllowAnyMethod();
             });
         });
 
@@ -56,6 +55,9 @@ public class Program
 
         // Add BlobStorageService
         builder.Services.AddScoped<BlobStorageService>();
+
+        // Add Application Insights telemetry
+        builder.Services.AddApplicationInsightsTelemetry(builder.Configuration["ApplicationInsights:InstrumentationKey"]);
 
         // Add Controllers with JSON options
         builder.Services.AddControllers()
