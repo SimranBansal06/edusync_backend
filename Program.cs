@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 using webapi.Data;
 using webapi.Services;
 
-public class Program
+public partial class Program
 {
     public static void Main(string[] args)
     {
@@ -16,11 +16,14 @@ public class Program
         // Add CORS
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("AllowAllOrigins", policy =>
+            options.AddPolicy("AllowEduSyncFrontend", policy =>
             {
-                policy.AllowAnyOrigin()
-                      .AllowAnyHeader()
-                      .AllowAnyMethod();
+                policy.WithOrigins(
+                    "https://agreeable-cliff-01fee0e00.6.azurestaticapps.net" // Azure frontend URL
+                                                                              // ,"http://localhost:3000"  // Local development URL (commented out)
+                )
+                .AllowAnyHeader()
+                .AllowAnyMethod();
             });
         });
 
@@ -40,7 +43,10 @@ public class Program
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = builder.Configuration["Jwt:Issuer"],
                 ValidAudience = builder.Configuration["Jwt:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "defaultkeyfordevwhichshouldbereplaced"))
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                    Environment.GetEnvironmentVariable("JWT_KEY") ??
+                    builder.Configuration["Jwt:Key"] ??
+                    "defaultkeyfordevwhichshouldbereplaced"))
             };
         });
 
@@ -77,7 +83,7 @@ public class Program
 
         var app = builder.Build();
 
-        // Configure the HTTP request pipeline
+        // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -88,19 +94,35 @@ public class Program
             // Use Swagger in production too for testing
             app.UseSwagger();
             app.UseSwaggerUI();
+
+            // Add HTTPS redirection and HSTS in production
+            app.UseHttpsRedirection();
+            app.UseHsts();
         }
 
-        // Use CORS with the new policy
-        app.UseCors("AllowAllOrigins");
+        // Use CORS with the specific policy
+        app.UseCors("AllowEduSyncFrontend");
 
         app.UseAuthentication();
         app.UseAuthorization();
 
-        // Only set up physical file provider if not in Azure (check for Azure environment)
+        // Azure environment detection
         if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")))
         {
-            // We're in Azure, don't use physical file provider
-            // Files should be stored in Azure Blob Storage instead
+            // We're in Azure - ensure blob storage is properly configured
+            app.Use(async (context, next) =>
+            {
+                try
+                {
+                    await next();
+                }
+                catch (Exception ex) when (ex.Message.Contains("blob storage"))
+                {
+                    // Log the error and return a helpful message
+                    context.Response.StatusCode = 500;
+                    await context.Response.WriteAsync("Azure Blob Storage configuration error. Please contact support.");
+                }
+            });
         }
         else
         {

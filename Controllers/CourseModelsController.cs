@@ -135,12 +135,13 @@ namespace webapi.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
         /// <summary>
-        /// 
+        /// Upload a file for a specific course
         /// </summary>
-        /// <param name="courseId"></param>
-        /// <param name="file"></param>
-        /// <returns></returns>
+        /// <param name="courseId">Course ID</param>
+        /// <param name="file">File to upload</param>
+        /// <returns>File information</returns>
         // POST: api/CourseModels/upload/{courseId}
         [HttpPost("upload/{courseId}")]
         public async Task<IActionResult> UploadCourseFile(Guid courseId, IFormFile file)
@@ -172,6 +173,62 @@ namespace webapi.Controllers
                     fileType = file.ContentType,
                     fileSize = file.Length
                 });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/CourseModels/download/{blobFileName}
+        [HttpGet("download/{blobFileName}")]
+        public async Task<IActionResult> DownloadFile(string blobFileName)
+        {
+            try
+            {
+                // Extract just the filename part if a full path was provided
+                string fileName = Path.GetFileName(blobFileName);
+
+                // Try to get the blob URL first
+                try
+                {
+                    // Get the file's URL from the blob storage
+                    string blobUrl = await _blobStorageService.GetBlobUrlAsync(fileName);
+
+                    // Redirect to the blob URL for direct download
+                    return Redirect(blobUrl);
+                }
+                catch (FileNotFoundException)
+                {
+                    // If getting the URL fails, try to download the blob directly
+                    try
+                    {
+                        Stream fileStream = await _blobStorageService.DownloadBlobAsync(fileName);
+
+                        // Try to determine content type
+                        string contentType = "application/octet-stream";
+                        string extension = Path.GetExtension(fileName).ToLowerInvariant();
+
+                        switch (extension)
+                        {
+                            case ".pdf": contentType = "application/pdf"; break;
+                            case ".doc": case ".docx": contentType = "application/msword"; break;
+                            case ".xls": case ".xlsx": contentType = "application/vnd.ms-excel"; break;
+                            case ".ppt": case ".pptx": contentType = "application/vnd.ms-powerpoint"; break;
+                            case ".jpg": case ".jpeg": contentType = "image/jpeg"; break;
+                            case ".png": contentType = "image/png"; break;
+                            case ".gif": contentType = "image/gif"; break;
+                            case ".mp4": contentType = "video/mp4"; break;
+                            case ".mp3": contentType = "audio/mpeg"; break;
+                        }
+
+                        return File(fileStream, contentType, fileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(500, $"Internal server error: {ex.Message}");
+                    }
+                }
             }
             catch (Exception ex)
             {
