@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using webapi.Data;
 using webapi.Models;
 using webapi.DTOs;  // Add this line
+using Microsoft.Extensions.Logging;
 
 namespace webapi.Controllers
 {
@@ -17,10 +17,14 @@ namespace webapi.Controllers
     public class ResultModelsController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly webapi.Services.EventHubService _eventHubService;
+        private readonly ILogger<ResultModelsController> _logger;
 
-        public ResultModelsController(AppDbContext context)
+        public ResultModelsController(AppDbContext context, webapi.Services.EventHubService eventHubService, ILogger<ResultModelsController> logger)
         {
             _context = context;
+            _eventHubService = eventHubService;
+            _logger = logger;
         }
 
         // GET: api/ResultModels
@@ -99,9 +103,21 @@ namespace webapi.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+                // Send event to Event Hub
+                var eventData = new
+                {
+                    EventType = "ResultCreated",
+                    ResultId = resultModel.ResultId,
+                    AssessmentId = resultModel.AssessmentId,
+                    UserId = resultModel.UserId,
+                    Score = resultModel.Score,
+                    AttemptDate = resultModel.AttemptDate
+                };
+                await _eventHubService.SendQuizEventAsync(eventData);
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException ex)
             {
+                _logger.LogError(ex, "Error saving result");
                 if (ResultModelExists(resultModel.ResultId))
                 {
                     return Conflict();

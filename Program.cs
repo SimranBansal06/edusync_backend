@@ -62,6 +62,9 @@ public partial class Program
         // Add BlobStorageService
         builder.Services.AddScoped<BlobStorageService>();
 
+        // Add EventHubService
+        builder.Services.AddSingleton<webapi.Services.EventHubService>();
+
         // Add Application Insights telemetry
         builder.Services.AddApplicationInsightsTelemetry(builder.Configuration["ApplicationInsights:InstrumentationKey"]);
 
