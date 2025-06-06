@@ -14,6 +14,7 @@ variables:
   azureAppName: "backendwebappedusync"
   solution: "**/*.sln"
   buildPlatform: "Any CPU"
+  runtimeIdentifier: "win-x64"
 
 # Define the steps for the pipeline
 steps:
@@ -48,7 +49,7 @@ steps:
     inputs:
       command: "publish"
       publishWebProjects: true
-      arguments: "--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)"
+      arguments: "--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory) --self-contained true -r $(runtimeIdentifier)"
       zipAfterPublish: true
     displayName: "Publish .NET Project"
 
@@ -76,4 +77,5 @@ steps:
       deploymentMethod: "auto"
       enableCustomDeployment: true
       removeAdditionalFilesFlag: true
+      appSettings: "-ASPNETCORE_ENVIRONMENT Production"
     displayName: "Deploy to Azure App Service"
