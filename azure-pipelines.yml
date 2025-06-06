@@ -3,79 +3,59 @@
 
 # Trigger the pipeline on pushes to the main branch
 trigger:
-  - main
+- main
 
 # Use a Microsoft-hosted agent VM image
 pool:
-  vmImage: "windows-latest"
+  vmImage: 'windows-latest'
 
 variables:
-  buildConfiguration: "Release"
-  azureAppName: "backendwebappedusync"
-  solution: "**/*.sln"
-  buildPlatform: "Any CPU"
-  runtimeIdentifier: "win-x64"
+  buildConfiguration: 'Release'
+  azureAppName: 'edusyncbackendapi'
 
 # Define the steps for the pipeline
 steps:
-  - task: UseDotNet@2
-    inputs:
-      packageType: "sdk"
-      version: "8.x"
-    displayName: "Install .NET SDK"
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '8.x'
+  displayName: 'Install .NET SDK'
 
-  - task: NuGetToolInstaller@1
-    displayName: "Install NuGet"
+- script: dotnet restore
+  displayName: 'Restore Dependencies'
 
-  - task: NuGetCommand@2
-    inputs:
-      restoreSolution: "$(solution)"
-    displayName: "NuGet restore"
+- script: dotnet build --configuration $(buildConfiguration) --no-restore
+  displayName: 'Build .NET Project'
 
-  - task: VSBuild@1
-    inputs:
-      solution: "$(solution)"
-      configuration: "$(buildConfiguration)"
-      platform: "$(buildPlatform)"
-    displayName: "Build solution"
+- script: dotnet publish -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory) --no-build
+  displayName: 'Publish .NET Project'
 
-  - task: VSTest@2
-    inputs:
-      platform: "$(buildPlatform)"
-      configuration: "$(buildConfiguration)"
-    displayName: "Run unit tests"
+# Create web.config file
+- powershell: |
+    $content = '<?xml version="1.0" encoding="utf-8"?><configuration><location path="." inheritInChildApplications="false"><system.webServer><handlers><add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModuleV2" resourceType="Unspecified" /></handlers><aspNetCore processPath="dotnet" arguments=".\webapi.dll" stdoutLogEnabled="true" stdoutLogFile="\\?\%home%\LogFiles\stdout" hostingModel="inprocess" /></system.webServer></location></configuration>'
+    Set-Content -Path "$(Build.ArtifactStagingDirectory)/web.config" -Value $content
+  displayName: 'Create web.config'
 
-  - task: DotNetCoreCLI@2
-    inputs:
-      command: "publish"
-      publishWebProjects: true
-      arguments: "--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory) --self-contained true -r $(runtimeIdentifier)"
-      zipAfterPublish: true
-    displayName: "Publish .NET Project"
+# Create basic appsettings.json
+- powershell: |
+    $content = '{"Logging":{"LogLevel":{"Default":"Information","Microsoft.AspNetCore":"Warning"}},"AllowedHosts":"*"}'
+    Set-Content -Path "$(Build.ArtifactStagingDirectory)/appsettings.json" -Value $content
+  displayName: 'Create basic appsettings.json'
 
-  # Create web.config file
-  - powershell: |
-      $content = '<?xml version="1.0" encoding="utf-8"?><configuration><location path="." inheritInChildApplications="false"><system.webServer><handlers><add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModuleV2" resourceType="Unspecified" /></handlers><aspNetCore processPath="dotnet" arguments=".\webapi.dll" stdoutLogEnabled="true" stdoutLogFile="\\?\%home%\LogFiles\stdout" hostingModel="inprocess"><environmentVariables><environmentVariable name="ASPNETCORE_ENVIRONMENT" value="Production" /></environmentVariables></aspNetCore></system.webServer></location></configuration>'
-      Set-Content -Path "$(Build.ArtifactStagingDirectory)/web.config" -Value $content
-    displayName: "Create web.config"
+# Create publish artifact
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+  displayName: 'Publish Artifacts'
 
-  # Create publish artifact
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: "$(Build.ArtifactStagingDirectory)"
-      ArtifactName: "drop"
-      publishLocation: "Container"
-    displayName: "Publish Artifacts"
-
-  # Deploy to Azure App Service
-  - task: AzureWebApp@1
-    inputs:
-      azureSubscription: "Serviceconnection1"
-      appType: "webApp"
-      appName: "$(azureAppName)"
-      package: "$(Build.ArtifactStagingDirectory)"
-      deploymentMethod: "auto"
-      enableCustomDeployment: true
-      removeAdditionalFilesFlag: true
-      appSettings: "-ASPNETCORE_ENVIRONMENT Production"
-    displayName: "Deploy to Azure App Service"
+# Deploy to Azure App Service
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'Azureconnections'
+    appType: 'webApp'
+    appName: '$(azureAppName)'
+    package: '$(Build.ArtifactStagingDirectory)'
+    deploymentMethod: 'auto'
+  displayName: 'Deploy to Azure App Service' 
