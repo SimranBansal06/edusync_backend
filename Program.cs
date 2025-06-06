@@ -19,8 +19,8 @@ public partial class Program
             options.AddPolicy("AllowEduSyncFrontend", policy =>
             {
                 policy.WithOrigins(
-                    //"https://agreeable-cliff-01fee0e00.6.azurestaticapps.net" // Azure frontend URL
-                                                                              "http://localhost:3000"  // Local development URL (commented out)
+                    "https://calm-hill-04dc3e200.6.azurestaticapps.net" // Azure frontend URL
+                                                                              //"http://localhost:3000"  // Local development URL (commented out)
                 )
                 .AllowAnyHeader()
                 .AllowAnyMethod();
