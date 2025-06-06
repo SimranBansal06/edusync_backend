@@ -53,7 +53,7 @@ steps:
 # Deploy to Azure App Service
 - task: AzureWebApp@1
   inputs:
-    azureSubscription: 'Azureconnections'
+    azureSubscription: 'Serviceconnection1'
     appType: 'webApp'
     appName: '$(azureAppName)'
     package: '$(Build.ArtifactStagingDirectory)'
